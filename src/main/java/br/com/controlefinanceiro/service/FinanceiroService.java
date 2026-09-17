@@ -45,6 +45,9 @@ public class FinanceiroService {
     }
 
     public List<Movimentacao> buscarPorCategoria(Categoria categoria) {
+        if (categoria == null) {
+            throw new RuntimeException("Categoria está vazia!");
+        }
         List<Movimentacao> movimentacoesCategoria = new ArrayList<>();
         for (Movimentacao movimentacao : movimentacoes) {
             if(movimentacao.getCategoria().equals(categoria)) {

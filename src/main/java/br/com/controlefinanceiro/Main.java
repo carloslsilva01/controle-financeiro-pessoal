@@ -4,7 +4,7 @@ import br.com.controlefinanceiro.model.Categoria;
 import br.com.controlefinanceiro.model.Movimentacao;
 import br.com.controlefinanceiro.service.FinanceiroService;
 
-import java.sql.SQLOutput;
+import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -24,7 +24,15 @@ public class Main {
             System.out.println("5. Buscar por categoria");
             System.out.println("0. Sair");
             System.out.print("Escolha uma opção: ");
-            Integer opcao = scNumero.nextInt();
+
+            Integer opcao;
+            try {
+                opcao = scNumero.nextInt();
+            } catch (InputMismatchException e) {
+                System.out.println("Digite um número válido!");
+                scNumero.nextLine();
+                continue;
+            }
 
             switch (opcao) {
                 case 1:
@@ -33,9 +41,10 @@ public class Main {
                     String descricao = scTexto.nextLine();
                     System.out.print("Insira o valor (R$): ");
                     Double valor = scNumero.nextDouble();
-                    System.out.print("Insira a categoria: ");
+                    System.out.println("Categorias disponíveis: Alimentacao, Transporte, Educacao, Lazer, Salario, Investimento e Outros");
+                    System.out.print("Digite uma categoria: ");
                     String categoria = scTexto.nextLine();
-                    Boolean resultado = servico.adicionarReceita(descricao, valor, Categoria.valueOf(categoria));
+                    Boolean resultado = servico.adicionarReceita(descricao, valor, Categoria.valueOf(categoria.toUpperCase()));
                     if(resultado) {
                         System.out.println("Receita cadastrada com sucesso!");
                     } else {
@@ -46,11 +55,12 @@ public class Main {
                     System.out.println("\n===== ADICIONAR DESPESA =====");
                     System.out.println("Insira a descrição:");
                     descricao = scTexto.nextLine();
-                    System.out.print("Insira o valor: ");
+                    System.out.print("Insira o valor (R$): ");
                     valor = scNumero.nextDouble();
-                    System.out.print("Insira a categoria: ");
+                    System.out.println("Categorias disponíveis: Alimentacao, Transporte, Educacao, Lazer, Salario, Investimento e Outros");
+                    System.out.print("Digite uma categoria: ");
                     categoria = scTexto.nextLine();
-                    resultado = servico.adicionarDespesa(descricao, valor, Categoria.valueOf(categoria));
+                    resultado = servico.adicionarDespesa(descricao, valor, Categoria.valueOf(categoria.toUpperCase()));
                     if(resultado) {
                         System.out.println("Despesa cadastrada com sucesso!");
                     } else {
@@ -77,25 +87,24 @@ public class Main {
                     break;
                 case 5:
                     System.out.println("\n===== BUSCA POR CATEGORIA =====");
+                    System.out.println("Categorias disponíveis: Alimentacao, Transporte, Educacao, Lazer, Salario, Investimento e Outros");
                     System.out.print("Digite uma categoria: ");
                     categoria = scTexto.next();
-                    Boolean valida = false;
-                    for(Categoria c: Categoria.values()) {
-                        if(c.equals(Categoria.valueOf(categoria))) {
-                            valida =  true;
-                            break;
-                        }
-                    }
-                    if(!valida) {
+                    Categoria categoriaProcurada;
+                    try {
+                        categoriaProcurada = Categoria.valueOf(categoria.toUpperCase());
+                    } catch (IllegalArgumentException e) {
                         System.out.println("Categoria Inexistente, tente novamente!");
+                        System.out.println("Houve um erro: " + e);
                         break;
                     }
-                    movimentacoes = servico.buscarPorCategoria(Categoria.valueOf(categoria));
+
+                    movimentacoes = servico.buscarPorCategoria(categoriaProcurada);
                     for (int i = 0; i < movimentacoes.size(); i++) {
                         System.out.println("\n#" + (i + 1) + " - Movimentação");
                         System.out.println("ID: " + movimentacoes.get(i).getId());
                         System.out.println("Data: " + movimentacoes.get(i).getData());
-                        System.out.println("Valor: " + movimentacoes.get(i).getValor());
+                        System.out.println("Valor (R$): " + movimentacoes.get(i).getValor());
                         System.out.println("Categoria: " + movimentacoes.get(i).getCategoria());
                         System.out.println("Descrição: " + movimentacoes.get(i).getDescricao());
                         System.out.println("\n========================");
@@ -103,6 +112,8 @@ public class Main {
                     break;
                 case 0:
                     System.exit(0);
+                default:
+                    System.out.println("Insira uma opção válida entre (0 - 5)");
             }
         }
     }
